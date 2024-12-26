@@ -1,14 +1,40 @@
 const { Telegraf } = require("telegraf");
 
-const bot = new Telegraf("YOUR_BOT_TOKEN_HERE"); // better use .env
+// Replace with your BotFather API token
+const BOT_TOKEN = "7656508773:AAE1GawfI6VQBHmto8l3U9bp_A_fhSoBSMk";
+const APP_URL = "https://youtube-short-clone-a.vercel.app";
 
-bot.start((ctx) => ctx.reply("I'm Running on Telegraf")); // will be executed when /start 
-bot.command("help", (ctx) => ctx.reply("Help Works")); // works when you type /help
-bot.on("sticker", (ctx) => // when bot recives a sticker , it reply with a sticker according to the sticker-id mention in replyWithSticker()
-  ctx.replyWithSticker(
-    "CAACAgUAAxkBAAEFyLNjGfp0a6emv-AbnJUxIrveMiYFggACxQEAAsTTqVSDFrDSj_I_PCkE"
-  )
-);
-bot.hears("hello", (ctx) => ctx.reply("Hello from Telegraf")); // triggered when bot gets "hello" as a message
+const bot = new Telegraf(BOT_TOKEN);
 
+bot.start((ctx) => {
+  const username = ctx.from.username || "User";
+  const launchUrl = `${APP_URL}?start=${ctx.from.id}`;
+
+  ctx.reply(
+    `Hello, ${username}! 👋\n\nClick the link below to launch the app:\n${launchUrl}`,
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Open App 🚀",
+              url: launchUrl,
+            },
+          ],
+        ],
+      },
+    }
+  );
+});
+
+bot.help((ctx) => {
+  ctx.reply("Send /start to launch the app.");
+});
+
+// Start the bot
 bot.launch();
+console.log("Bot is running...");
+
+// Graceful shutdown for deployment
+process.once("SIGINT", () => bot.stop("SIGINT"));
+process.once("SIGTERM", () => bot.stop("SIGTERM"));
